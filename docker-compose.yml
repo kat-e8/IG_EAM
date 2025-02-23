@@ -15,7 +15,27 @@ services:
     command: >
       -n edge-gateway
       -m 2048
+  central:
+    image: inductiveautomation/ignition:8.1.45
+    hostname: central
+    ports:
+      - 9090:8088
+    volumes:
+      - central-data:/usr/local/bin/ignition/data
+    networks:
+      - central-network
+      - edge-network
+    environment:
+      - IGNITION_EDITION=standard
+      - GATEWAY_ADMIN_PASSWORD=gagoopane
+      - ACCEPT_IGNITION_EULA=Y
+    command: >
+      -n central-gateway
+      -m 2048
+
 networks:
   edge-network:
+  central-network:
 volumes:
   edge-data:
+  central-data:
