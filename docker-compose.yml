@@ -1,47 +1,45 @@
 services:
-  frontend:
+  edge:
     image: inductiveautomation/ignition:8.1.45
-    hostname: frontend
+    hostname: edge
     ports:
       - 9088:8088
     volumes:
-      - frontend-data:/usr/local/bin/ignition/data
-      - ./gw-init/frontend.gwbk:/restore.gwbk
-      - ./gw-init/frontend-uuid.txt:/usr/local/bin/ignition/data/.uuid
-      - ./gw-init/frontend-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
-      - ./pylib/speciallibrary.py:/usr/local/bin/ignition/user-lib/pylib/speciallibrary.py
+      - edge-data:/usr/local/bin/ignition/data
+      - ./gw-init/edge.gwbk:/restore.gwbk
+      - ./gw-init/edge-uuid.txt:/usr/local/bin/ignition/data/.uuid
+      - ./gw-init/edge-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
     networks:
-      - frontend-network
+      - edge-network
     secrets:
       - gateway-password
     environment:
-      - IGNITION_EDITION=standard
+      - IGNITION_EDITION=edge
       - GATEWAY_ADMIN_PASSWORD_FILE=/run/secrets/gateway-password
       - ACCEPT_IGNITION_EULA=Y
-      - GATEWAY_MODULES_ENABLED=alarm-notification,logix-driver,opc-ua,tag-historian
     command: >
-      -n frontend-gateway
+      -n edge-gateway
       -m 2048
       -r /restore.gwbk
-  backend:
+  central:
     image: inductiveautomation/ignition:8.1.45
-    hostname: backend
+    hostname: central
     ports:
       - 9090:8088
     volumes:
-      - backend-data:/usr/local/bin/ignition/data
-      - ./gw-init/backend.gwbk:/restore.gwbk
-      - ./gw-init/backend-uuid.txt:/usr/local/bin/ignition/data/.uuid
-      - ./gw-init/backend-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
+      - central-data:/usr/local/bin/ignition/data
+      - ./gw-init/central.gwbk:/restore.gwbk
+      - ./gw-init/central-uuid.txt:/usr/local/bin/ignition/data/.uuid
+      - ./gw-init/central-metro-keystore:/usr/local/bin/ignition/data/local/metro-keystore
     networks:
-      - frontend-network
-      - backend-network
+      - central-network
+      - edge-network
     environment:
       - IGNITION_EDITION=standard
       - GATEWAY_ADMIN_PASSWORD=gagoopane
       - ACCEPT_IGNITION_EULA=Y
     command: >
-      -n backend-gateway
+      -n central-gateway
       -m 2048
       -r /restore.gwbk
   db:
@@ -51,7 +49,7 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     networks:
-      backend-network:
+      central-network:
         aliases:
           - main-db
     environment:
@@ -65,7 +63,7 @@ services:
       - 1080:1080
       - 1025:1025
     networks:
-      backend-network:
+      central-network:
         aliases:
           - mail-server
 
@@ -73,9 +71,9 @@ secrets:
   gateway-password:
     file: ./secrets/GATEWAY_PASSWORD
 networks:
-  frontend-network:
-  backend-network:
+  edge-network:
+  central-network:
 volumes:
-  frontend-data:
-  backend-data:
+  edge-data:
+  central-data:
   db-data:
