@@ -32,6 +32,21 @@ services:
     command: >
       -n central-gateway
       -m 2048
+  db:
+    image: mariadb:10.10.2
+    ports:
+      - 3306:3306
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      central-network:
+        aliases:
+          - main-db
+    environment:
+      - MARIADB_ROOT_PASSWORD=ignition
+      - MARIADB_DATABASE=ignition
+      - MARIADB_USER=ignition
+      - MARIADB_PASSWORD=ignition
 
 networks:
   edge-network:
@@ -39,3 +54,4 @@ networks:
 volumes:
   edge-data:
   central-data:
+  db-data:
